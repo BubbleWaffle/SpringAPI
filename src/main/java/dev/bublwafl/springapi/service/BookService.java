@@ -7,7 +7,6 @@ import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,12 +16,10 @@ import java.util.stream.Collectors;
 @Service
 public class BookService {
     private final BookRepository bookRepository;
-    private final ModelMapper modelMapper;
     private final AuthorService authorService;
     private final TagService tagService;
-    public BookService(BookRepository bookRepository, ModelMapper modelMapper, AuthorService authorService, TagService tagService) {
+    public BookService(BookRepository bookRepository, AuthorService authorService, TagService tagService) {
         this.bookRepository = bookRepository;
-        this.modelMapper = modelMapper;
         this.authorService = authorService;
         this.tagService = tagService;
     }
@@ -54,11 +51,11 @@ public class BookService {
 
     public BookDTO read(Long id) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Book not found"));
-        return modelMapper.map(book, BookDTO.class);
+        return convertToDTO(book);
     }
 
     public List<BookDTO> readAll() {
-        return bookRepository.findAll().stream().map(book -> modelMapper.map(book, BookDTO.class)).collect(Collectors.toList());
+        return bookRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     public BookDTO update(AddBookDTO dto, Long id) {

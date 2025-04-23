@@ -41,11 +41,11 @@ public class TagService {
 
     public TagDTO read(Long id) {
         Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found"));
-        return modelMapper.map(tag, TagDTO.class);
+        return mapTagToDTO(tag);
     }
 
     public List<TagDTO> readAll() {
-        return tagRepository.findAll().stream().map(tag -> modelMapper.map(tag, TagDTO.class)).collect(Collectors.toList());
+        return tagRepository.findAll().stream().map(this::mapTagToDTO).collect(Collectors.toList());
     }
 
     public TagDTO update(AddTagDTO dto, Long id) {
@@ -71,5 +71,14 @@ public class TagService {
         tag.getBooks().clear();
 
         tagRepository.deleteById(id);
+    }
+
+    private TagDTO mapTagToDTO(Tag tag) {
+        TagDTO dto = new TagDTO();
+        dto.setId(tag.getId());
+        dto.setName(tag.getName());
+        dto.setBookIds(tag.getBooks().stream().map(Book::getId).collect(Collectors.toSet()));
+
+        return dto;
     }
 }

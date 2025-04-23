@@ -32,13 +32,10 @@ public class RateService {
 
         if (dto.getValue() < 1 || dto.getValue() > 5) throw new IllegalArgumentException("Rating must be between 1 and 5");
 
-        Rate rate = modelMapper.map(dto, Rate.class);
-
-        Book book = bookService.getBookEntityById(dto.getBookId());
-        Reader reader = readerService.getReaderEntityById(dto.getReaderId());
-
-        rate.setBook(book);
-        rate.setReader(reader);
+        Rate rate = new Rate();
+        rate.setValue(dto.getValue());
+        rate.setBook(bookService.getBookEntityById(dto.getBookId()));
+        rate.setReader(readerService.getReaderEntityById(dto.getReaderId()));
 
         rate = rateRepository.save(rate);
         return modelMapper.map(rate, RateDTO.class);
