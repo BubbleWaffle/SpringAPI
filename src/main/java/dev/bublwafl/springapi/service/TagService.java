@@ -2,6 +2,7 @@ package dev.bublwafl.springapi.service;
 
 import dev.bublwafl.springapi.DTO.AddTagDTO;
 import dev.bublwafl.springapi.DTO.TagDTO;
+import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.TagRepository;
 import jakarta.persistence.EntityExistsException;
@@ -52,7 +53,7 @@ public class TagService {
 
         Optional<Tag> existingTag = tagRepository.findByName(dto.getName());
 
-        if (existingTag.isPresent()) throw new EntityExistsException("Tag with name " + dto.getName() + " already exists");
+        if (existingTag.isPresent()) throw new EntityExistsException("Tag already exists");
 
         tag.setName(dto.getName());
         tag = tagRepository.save(tag);
@@ -61,7 +62,14 @@ public class TagService {
     }
 
     public void delete(Long id) {
-        if(!tagRepository.existsById(id)) throw new EntityNotFoundException("Tag not found");
+        Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found"));
+
+        for (Book book : tag.getBooks()) {
+            book.getTags().remove(tag);
+        }
+
+        tag.getBooks().clear();
+
         tagRepository.deleteById(id);
     }
 }

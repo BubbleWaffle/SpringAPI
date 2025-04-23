@@ -3,6 +3,7 @@ package dev.bublwafl.springapi.service;
 import dev.bublwafl.springapi.DTO.AddAuthorDTO;
 import dev.bublwafl.springapi.DTO.AuthorDTO;
 import dev.bublwafl.springapi.entity.Author;
+import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.repo.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -34,19 +35,13 @@ public class AuthorService {
     public AuthorDTO read(Long id) {
         Author author = authorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Author not found"));
 
-        AuthorDTO authorDTO = modelMapper.map(author, AuthorDTO.class);
-        authorDTO.setNo_books(author.getBooks().size());
-
-        return authorDTO;
+        return mapAuthorToDTO(author);
     }
 
     public List<AuthorDTO> readAll() {
         return authorRepository.findAll().stream()
-                .map(author -> {
-                    AuthorDTO authorDTO = modelMapper.map(author, AuthorDTO.class);
-                    authorDTO.setNo_books(author.getBooks().size());
-                    return authorDTO;
-                }).toList();
+                .map(this::mapAuthorToDTO)
+                .toList();
     }
 
     public AuthorDTO update(AddAuthorDTO dto, Long id) {
@@ -65,5 +60,18 @@ public class AuthorService {
     public void delete(Long id) {
         if(!authorRepository.existsById(id)) throw new EntityNotFoundException("Author not found");
         authorRepository.deleteById(id);
+    }
+
+    private AuthorDTO mapAuthorToDTO(Author author) {
+        AuthorDTO dto = new AuthorDTO();
+        dto.setId(author.getId());
+        dto.setName(author.getName());
+        dto.setSurname(author.getSurname());
+        dto.setNo_books(author.getBooks().size());
+        dto.setBooks(author.getBooks().stream()
+                .map(Book::getId)
+                .toList());
+
+        return dto;
     }
 }
