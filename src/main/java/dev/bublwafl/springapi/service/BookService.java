@@ -4,6 +4,7 @@ import dev.bublwafl.springapi.DTO.AddBookDTO;
 import dev.bublwafl.springapi.DTO.BookDTO;
 import dev.bublwafl.springapi.entity.Author;
 import dev.bublwafl.springapi.entity.Book;
+import dev.bublwafl.springapi.entity.Rate;
 import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,10 +19,12 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorService authorService;
     private final TagService tagService;
-    public BookService(BookRepository bookRepository, AuthorService authorService, TagService tagService) {
+    private final RateService rateService;
+    public BookService(BookRepository bookRepository, AuthorService authorService, TagService tagService, RateService rateService) {
         this.bookRepository = bookRepository;
         this.authorService = authorService;
         this.tagService = tagService;
+        this.rateService = rateService;
     }
 
     public Book getBookEntityById(Long id) {
@@ -93,6 +96,13 @@ public class BookService {
         dto.setId(book.getId());
         dto.setTitle(book.getTitle());
         dto.setAuthor(book.getAuthor().getName() + " " + book.getAuthor().getSurname());
+
+        List<Rate> rates = rateService.getRateByBookId(book.getId());
+
+        if (rates != null && !rates.isEmpty()) {
+            dto.setAverageRating(rates.stream().mapToDouble(Rate::getValue).sum()/rates.size());
+            dto.setRateIds(rates.stream().map(Rate::getId).collect(Collectors.toList()));
+        }
 
         if (book.getTags() != null) {
             Set<String> tagNames = book.getTags().stream()

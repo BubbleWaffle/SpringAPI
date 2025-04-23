@@ -3,12 +3,11 @@ package dev.bublwafl.springapi.service;
 import dev.bublwafl.springapi.DTO.AddRateDTO;
 import dev.bublwafl.springapi.DTO.RateDTO;
 import dev.bublwafl.springapi.DTO.UpdateRateDTO;
-import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.entity.Rate;
-import dev.bublwafl.springapi.entity.Reader;
 import dev.bublwafl.springapi.repo.RateRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,14 +19,23 @@ public class RateService {
     private final ModelMapper modelMapper;
     private final BookService bookService;
     private final ReaderService readerService;
-    public RateService(RateRepository rateRepository, ModelMapper modelMapper, BookService bookService, ReaderService readerService) {
+    public RateService(RateRepository rateRepository, ModelMapper modelMapper, @Lazy BookService bookService, ReaderService readerService) {
         this.rateRepository = rateRepository;
         this.modelMapper = modelMapper;
         this.bookService = bookService;
         this.readerService = readerService;
     }
 
+    public List<Rate> getRateByBookId(Long bookId) {
+        return rateRepository.findByBookId(bookId);
+    }
+
+    // CRUD
     public RateDTO create(AddRateDTO dto) {
+        if (readerService.getReaderEntityById(dto.getReaderId()) == null) throw new EntityNotFoundException("Reader not found");
+
+        if (bookService.getBookEntityById(dto.getBookId()) == null) throw new EntityNotFoundException("Book not found");
+
         if (rateRepository.existsByBookIdAndReaderId(dto.getBookId(), dto.getReaderId())) throw new IllegalStateException("Reader has already rated this book");
 
         if (dto.getValue() < 1 || dto.getValue() > 5) throw new IllegalArgumentException("Rating must be between 1 and 5");
