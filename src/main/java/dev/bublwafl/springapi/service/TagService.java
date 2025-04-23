@@ -7,6 +7,7 @@ import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.TagRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,13 @@ public class TagService {
     }
 
     // CRUD
+    @Transactional
     public TagDTO create(AddTagDTO dto) {
         Optional<Tag> existingTag = tagRepository.findByName(dto.getName());
+
+        if (dto.getName() == null || dto.getName().isEmpty()) {
+            throw new EntityNotFoundException("Tag name is required");
+        }
 
         if (existingTag.isPresent()) return modelMapper.map(existingTag.get(), TagDTO.class);
 
@@ -48,6 +54,7 @@ public class TagService {
         return tagRepository.findAll().stream().map(this::mapTagToDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     public TagDTO update(AddTagDTO dto, Long id) {
         Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 
@@ -61,6 +68,7 @@ public class TagService {
         return modelMapper.map(tag, TagDTO.class);
     }
 
+    @Transactional
     public void delete(Long id) {
         Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 

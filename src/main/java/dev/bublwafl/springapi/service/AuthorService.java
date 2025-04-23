@@ -6,6 +6,7 @@ import dev.bublwafl.springapi.entity.Author;
 import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.repo.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class AuthorService {
     }
 
     // CRUD
+    @Transactional
     public AuthorDTO create(AddAuthorDTO dto) {
         Author author = modelMapper.map(dto, Author.class);
         author = authorRepository.save(author);
@@ -44,6 +46,7 @@ public class AuthorService {
                 .toList();
     }
 
+    @Transactional
     public AuthorDTO update(AddAuthorDTO dto, Long id) {
         Author author = authorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Author not found"));
 
@@ -57,6 +60,7 @@ public class AuthorService {
         return authorDTO;
     }
 
+    @Transactional
     public void delete(Long id) {
         if(!authorRepository.existsById(id)) throw new EntityNotFoundException("Author not found");
         authorRepository.deleteById(id);

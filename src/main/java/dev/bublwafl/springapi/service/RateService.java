@@ -3,9 +3,12 @@ package dev.bublwafl.springapi.service;
 import dev.bublwafl.springapi.DTO.AddRateDTO;
 import dev.bublwafl.springapi.DTO.RateDTO;
 import dev.bublwafl.springapi.DTO.UpdateRateDTO;
+import dev.bublwafl.springapi.entity.Book;
 import dev.bublwafl.springapi.entity.Rate;
+import dev.bublwafl.springapi.entity.Reader;
 import dev.bublwafl.springapi.repo.RateRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -31,10 +34,10 @@ public class RateService {
     }
 
     // CRUD
+    @Transactional
     public RateDTO create(AddRateDTO dto) {
-        if (readerService.getReaderEntityById(dto.getReaderId()) == null) throw new EntityNotFoundException("Reader not found");
-
-        if (bookService.getBookEntityById(dto.getBookId()) == null) throw new EntityNotFoundException("Book not found");
+        Book book = bookService.getBookEntityById(dto.getBookId());
+        Reader reader = readerService.getReaderEntityById(dto.getReaderId());
 
         if (rateRepository.existsByBookIdAndReaderId(dto.getBookId(), dto.getReaderId())) throw new IllegalStateException("Reader has already rated this book");
 
@@ -42,8 +45,8 @@ public class RateService {
 
         Rate rate = new Rate();
         rate.setValue(dto.getValue());
-        rate.setBook(bookService.getBookEntityById(dto.getBookId()));
-        rate.setReader(readerService.getReaderEntityById(dto.getReaderId()));
+        rate.setBook(book);
+        rate.setReader(reader);
 
         rate = rateRepository.save(rate);
         return modelMapper.map(rate, RateDTO.class);
@@ -58,6 +61,7 @@ public class RateService {
         return rateRepository.findAll().stream().map(rate -> modelMapper.map(rate, RateDTO.class)).collect(Collectors.toList());
     }
 
+    @Transactional
     public RateDTO update(UpdateRateDTO dto, Long id) {
         Rate rate = rateRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Rate not found"));
 
@@ -69,6 +73,7 @@ public class RateService {
         return modelMapper.map(rate, RateDTO.class);
     }
 
+    @Transactional
     public void delete(Long id) {
         if(!rateRepository.existsById(id)) throw new EntityNotFoundException("Rate not found");
         rateRepository.deleteById(id);

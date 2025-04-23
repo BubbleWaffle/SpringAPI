@@ -8,6 +8,7 @@ import dev.bublwafl.springapi.entity.Rate;
 import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,8 +33,14 @@ public class BookService {
     }
 
     // CRUD
+    @Transactional
     public BookDTO create(AddBookDTO dto) {
         Book book = new Book();
+
+        if (dto.getTitle() == null || dto.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be empty");
+        }
+
         book.setTitle(dto.getTitle());
 
         Author author = authorService.getAuthorById(dto.getAuthorId());
@@ -61,6 +68,7 @@ public class BookService {
         return bookRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    @Transactional
     public BookDTO update(AddBookDTO dto, Long id) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Book not found"));
 
@@ -86,6 +94,7 @@ public class BookService {
         return convertToDTO(book);
     }
 
+    @Transactional
     public void delete(Long id) {
         if(!bookRepository.existsById(id)) throw new EntityNotFoundException("Book not found");
         bookRepository.deleteById(id);
