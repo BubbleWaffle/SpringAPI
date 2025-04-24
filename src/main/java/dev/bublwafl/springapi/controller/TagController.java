@@ -3,12 +3,15 @@ package dev.bublwafl.springapi.controller;
 import dev.bublwafl.springapi.DTO.AddTagDTO;
 import dev.bublwafl.springapi.DTO.TagDTO;
 import dev.bublwafl.springapi.service.TagService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tag")
+@Validated
 public class TagController {
     private final TagService tagService;
     public TagController(TagService tagService) {
@@ -25,9 +28,9 @@ public class TagController {
         return tagService.read(id);
     }
 
-    @GetMapping("/all")
-    public List<TagDTO> readAll() {
-        return tagService.readAll();
+    @GetMapping("/chunk")
+    public Page<TagDTO> readChunk(@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "3") @Min(1) @Max(3) int size) {
+        return tagService.readChunk(page, size);
     }
 
     @PutMapping("/{id}")

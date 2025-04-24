@@ -9,9 +9,11 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,8 +52,9 @@ public class TagService {
         return mapTagToDTO(tag);
     }
 
-    public List<TagDTO> readAll() {
-        return tagRepository.findAll().stream().map(this::mapTagToDTO).collect(Collectors.toList());
+    public Page<TagDTO> readChunk(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return tagRepository.findAll(pageable).map(this::mapTagToDTO);
     }
 
     @Transactional

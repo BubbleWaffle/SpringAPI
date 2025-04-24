@@ -9,6 +9,9 @@ import dev.bublwafl.springapi.entity.Tag;
 import dev.bublwafl.springapi.repo.BookRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -64,8 +67,9 @@ public class BookService {
         return convertToDTO(book);
     }
 
-    public List<BookDTO> readAll() {
-        return bookRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+    public Page<BookDTO> readChunk(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return bookRepository.findAll(pageable).map(this::convertToDTO);
     }
 
     @Transactional

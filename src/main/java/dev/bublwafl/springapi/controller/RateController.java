@@ -4,12 +4,15 @@ import dev.bublwafl.springapi.DTO.AddRateDTO;
 import dev.bublwafl.springapi.DTO.RateDTO;
 import dev.bublwafl.springapi.DTO.UpdateRateDTO;
 import dev.bublwafl.springapi.service.RateService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/rate")
+@Validated
 public class RateController {
     private final RateService rateService;
     public RateController(RateService rateService) {
@@ -26,9 +29,9 @@ public class RateController {
         return rateService.read(id);
     }
 
-    @GetMapping("/all")
-    public List<RateDTO> readAll() {
-        return rateService.readAll();
+    @GetMapping("/chunk")
+    public Page<RateDTO> readChunk(@RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "3") @Min(1) @Max(3) int size) {
+        return rateService.readChunk(page, size);
     }
 
     @PutMapping("/{id}")

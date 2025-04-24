@@ -11,10 +11,12 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class RateService {
@@ -57,8 +59,9 @@ public class RateService {
         return modelMapper.map(rate, RateDTO.class);
     }
 
-    public List<RateDTO> readAll() {
-        return rateRepository.findAll().stream().map(rate -> modelMapper.map(rate, RateDTO.class)).collect(Collectors.toList());
+    public Page<RateDTO> readChunk(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return rateRepository.findAll(pageable).map(rate -> modelMapper.map(rate, RateDTO.class));
     }
 
     @Transactional

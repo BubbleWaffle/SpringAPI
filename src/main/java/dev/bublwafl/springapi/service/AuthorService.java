@@ -8,9 +8,10 @@ import dev.bublwafl.springapi.repo.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class AuthorService {
@@ -40,10 +41,9 @@ public class AuthorService {
         return mapAuthorToDTO(author);
     }
 
-    public List<AuthorDTO> readAll() {
-        return authorRepository.findAll().stream()
-                .map(this::mapAuthorToDTO)
-                .toList();
+    public Page<AuthorDTO> readChunk(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return authorRepository.findAll(pageable).map(this::mapAuthorToDTO);
     }
 
     @Transactional

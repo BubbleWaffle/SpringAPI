@@ -7,10 +7,10 @@ import dev.bublwafl.springapi.repo.ReaderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReaderService {
@@ -48,8 +48,9 @@ public class ReaderService {
         return modelMapper.map(reader, ReaderDTO.class);
     }
 
-    public List<ReaderDTO> readAll() {
-        return readerRepository.findAll().stream().map(read -> modelMapper.map(read, ReaderDTO.class)).collect(Collectors.toList());
+    public Page<ReaderDTO> readChunk(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return readerRepository.findAll(pageable).map(read -> modelMapper.map(read, ReaderDTO.class));
     }
 
     @Transactional
